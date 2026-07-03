@@ -1,7 +1,6 @@
 /**
  * Dieses File enthält Unit-Tests für die Historien-Verwaltung (History).
- * Geprüft wird insbesondere die korrekte Funktionalität von Undo- und Redo-Aktionen
- * sowie die Replay-Funktion zum Wiederholen von Edits.
+ * Geprüft wird insbesondere die korrekte Funktionalität von Undo- und Redo-Aktionen.
  */
 package todo
 
