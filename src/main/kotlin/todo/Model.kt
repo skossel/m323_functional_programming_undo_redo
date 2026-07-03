@@ -1,3 +1,8 @@
+/**
+ * Dieses File definiert das Datenmodell für die Todo-Anwendung.
+ * Es enthält die Klassen Task und TodoList sowie grundlegende Funktionen
+ * zur Manipulation der Liste, wie das Hinzufügen von (Unter-)Aufgaben.
+ */
 package todo
 
 data class Task(

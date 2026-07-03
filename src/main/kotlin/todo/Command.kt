@@ -1,3 +1,8 @@
+/**
+ * Dieses File definiert die Befehlsstruktur der Todo-App.
+ * Es enthält das sealed interface Command und dessen Implementierungen (Edit, Undo, Redo).
+ * Zudem wird hier festgelegt, wie Edits auf eine Todo-Liste angewendet werden.
+ */
 package todo
 
 sealed interface Command
