@@ -2,3 +2,9 @@
 build/
 .idea/
 *.iml
+
+# Kotlin compiler daemon logs
+.kotlin/
+
+# Local Claude Code settings (machine-specific)
+.claude/settings.local.json
