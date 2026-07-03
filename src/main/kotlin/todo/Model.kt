@@ -34,3 +34,14 @@ fun addSubtask(list: TodoList, parent: String, name: String): TodoList =
 
 fun completeTask(list: TodoList, name: String): TodoList =
     list.copy(tasks = list.tasks.map { updateTask(it, name, ::markAllDone) })
+
+data class Progress(val done: Int, val total: Int)
+
+fun countProgress(tasks: List<Task>): Progress =
+    tasks.fold(Progress(0, 0)) { acc, task ->
+        val sub = countProgress(task.subtasks)
+        Progress(
+            done = acc.done + sub.done + if (isComplete(task)) 1 else 0,
+            total = acc.total + sub.total + 1,
+        )
+    }

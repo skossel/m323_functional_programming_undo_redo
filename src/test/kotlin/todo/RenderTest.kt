@@ -37,4 +37,12 @@ class RenderTest {
         list = completeTask(list, "Tickets")
         assertEquals("[x] Trip\n  [x] Tickets", render(list))
     }
+
+    @Test
+    fun rendersProgressSummary() {
+        var list = addTask(TodoList(), "A")
+        list = addTask(list, "B")
+        list = completeTask(list, "A")
+        assertEquals("Progress: 1/2 completed", renderProgress(list))
+    }
 }
