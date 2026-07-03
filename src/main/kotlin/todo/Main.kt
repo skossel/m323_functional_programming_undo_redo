@@ -39,6 +39,7 @@ private tailrec fun loop(history: History) {
         val updated = applyCommand(history, command)
         println("\nCurrent Todo list:")
         println(render(updated.present))
+        if (updated.present.tasks.isNotEmpty()) println(renderProgress(updated.present))
         println()
         updated
     }

@@ -9,6 +9,11 @@ fun render(list: TodoList): String =
     if (list.tasks.isEmpty()) "(no tasks yet)"
     else list.tasks.joinToString("\n") { renderTaskRecursive(it, 0) }
 
+fun renderProgress(list: TodoList): String {
+    val progress = countProgress(list.tasks)
+    return "Progress: ${progress.done}/${progress.total} completed"
+}
+
 private fun renderTaskRecursive(task: Task, depth: Int): String {
     val indent = "  ".repeat(depth)
     val checkbox = if (isComplete(task)) "[x]" else "[ ]"

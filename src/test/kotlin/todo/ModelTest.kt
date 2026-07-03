@@ -50,4 +50,14 @@ class ModelTest {
         completeTask(original, "Original")
         assertFalse(isComplete(original.tasks.single()))
     }
+
+    @Test
+    fun countProgressFoldsDoneAndTotalOverTheWholeTree() {
+        var list = addTask(TodoList(), "Trip")
+        list = addSubtask(list, "Trip", "Tickets")
+        list = addSubtask(list, "Trip", "Hotel")
+        list = completeTask(list, "Tickets")
+
+        assertEquals(Progress(done = 1, total = 3), countProgress(list.tasks))
+    }
 }
