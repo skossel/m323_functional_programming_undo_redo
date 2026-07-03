@@ -33,3 +33,7 @@ tasks.test {
 application {
     mainClass.set("todo.MainKt")
 }
+
+tasks.named<JavaExec>("run") {
+    standardInput = System.`in`
+}
