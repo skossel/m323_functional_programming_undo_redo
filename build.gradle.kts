@@ -1,3 +1,7 @@
+/**
+ * Dieses File enthält die Build-Konfiguration für das Projekt.
+ * Hier werden Plugins, Abhängigkeiten und Repository-Einstellungen definiert.
+ */
 plugins {
     kotlin("jvm") version "2.2.20"
     application
