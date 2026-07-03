@@ -1,6 +1,6 @@
 # Undo/Redo Todo (Modul m323, Funktionale Programmierung)
 
-Eine kleine CLI-Todo-Anwendung in Kotlin. Man kann Aufgaben und Unteraufgaben erstellen, sie abhaken und jede Aktion rückgängig machen (Undo) oder wiederherstellen (Redo). Das Projekt ist bewusst klein gehalten, damit die funktionalen Konzepte klar sichtbar und einfach zu erklären sind.
+Eine kleine CLI-Todo-Anwendung in Kotlin. Man kann Aufgaben und Unteraufgaben erstellen, sie abhaken und jede Aktion rückgängig machen (Undo) oder wiederherstellen (Redo). 
 
 ## Funktionen
 
@@ -16,18 +16,15 @@ Eine kleine CLI-Todo-Anwendung in Kotlin. Man kann Aufgaben und Unteraufgaben er
 
 ## Ausführen
 
-Voraussetzung: ein JDK (ab JDK 17 lauffähig; getestet mit JDK 21 und JDK 25).
+Voraussetzung: ab JDK 17 lauffähig
 
-Am einfachsten in IntelliJ IDEA: Projekt öffnen, Gradle importiert automatisch. Dann `Main.kt` ausführen. Die Tests liegen im Verzeichnis `src/test`.
-
-Über die Kommandozeile mit Gradle:
+Gradle:
 
 ```
 gradle run      # startet die App
 gradle test     # führt alle Unit-Tests aus
 ```
 
-Ein Gradle-Wrapper ist vorhanden, du kannst daher auch `./gradlew run` bzw. `./gradlew test` verwenden (unter Windows `gradlew.bat run` bzw. `gradlew.bat test`).
 
 ## Beispielsitzung
 
@@ -84,9 +81,9 @@ Der gesamte Code ist in einen reinen Kern (pure core) und eine dünne, unreine S
 | Konzept | Stelle im Code |
 |---|---|
 | Reine Funktionen | alle Funktionen ausser in `Main.kt` (z. B. `addTask`, `completeTask`, `applyEdit`, `undo`, `render`) |
-| Unveränderliche Daten | `Task` und `TodoList` sind `data class`, Änderungen nur über `.copy()`, nie durch Mutation |
-| Rekursion | `isComplete`, `markAllDone`, `updateTask`, `countProgress`, `renderTaskRecursive` und die `loop` in Main (tailrec) |
-| Pattern Matching | erschöpfendes `when` über `sealed`-Typen in `applyEdit` und `applyCommand` (kein `else`) |
+| Unveränderliche Daten | `Task` und `TodoList` sind `data class`, Änderungen nur über `.copy()` |
+| Rekursion | `isComplete`, `markAllDone`, `updateTask`, `countProgress`, `renderTaskRecursive` |
+| Pattern Matching | `when` über `sealed`-Typen in `applyEdit` und `applyCommand` (kein `else`) |
 | map / filter / fold | `list.tasks.map { ... }` in `Model.kt`; `subtasks.all { isComplete(it) }` in `isComplete`; `tasks.fold(Progress(0, 0)) { ... }` in `countProgress` |
 | Higher-Order Functions | `updateTask(task, name, transform)` nimmt eine Funktion entgegen, genutzt von `addSubtask` und `completeTask` |
 | Isolierte Seiteneffekte | alle `println` und `readlnOrNull` ausschliesslich in `Main.kt` |
@@ -94,7 +91,7 @@ Der gesamte Code ist in einen reinen Kern (pure core) und eine dünne, unreine S
 ### Die Grundidee: Warum Undo/Redo hier fast gratis ist
 
 Die Historie besteht aus drei unveränderlichen Listen: `past`, `present`, `future`.
-Weil jeder `TodoList`-Zustand unveränderlich ist, ist ein Snapshot einfach der Wert selbst. Nichts muss kopiert oder eingefroren werden. Undo bedeutet nur: den letzten Zustand aus `past` zum neuen `present` machen und den aktuellen `present` für ein späteres Redo in die `future` schieben. In einer veränderlichen Welt müsste man bei jedem Schritt eine tiefe Kopie anlegen; sonst würden alle Snapshots auf dasselbe, veränderte Objekt zeigen.
+Weil jeder `TodoList`-Zustand unveränderlich ist, ist ein Snapshot einfach der Wert selbst. Nichts muss kopiert oder freezed werden. Undo bedeutet nur: den letzten Zustand aus `past` zum neuen `present` machen und den aktuellen `present` für ein späteres Redo in die `future` schieben.
 
 ### Trennung von Geschäftslogik und Benutzeroberfläche
 
@@ -122,33 +119,16 @@ Alle reinen Funktionen sind mit `kotlin.test` abgedeckt:
 Ich habe dieses Projekt selbst im Unterricht entwickelt und die funktionalen Konzepte eines nach dem anderen erarbeitet. Die KI habe ich als Assistenz eingesetzt — um jedes Konzept in idiomatisches Kotlin zu übersetzen, meinen Code zu reviewen, Fehler zu finden sowie für sprachliche und kommentarbezogene Bereinigung. Das Programm wurde bewusst **nicht** in einem einzigen „One-Shot" erzeugt; ich habe es Konzept für Konzept aufgebaut und kann jeden Teil des Codes erklären und verteidigen.
 
 ### Eingesetzte Werkzeuge
-- **Claude (Anthropic)** — Pair-Programming-Unterstützung bei der Umsetzung der einzelnen Konzepte sowie Code-Review und Feedback.
-- **Junie (JetBrains AI)** — ein späterer Durchgang zur Vereinfachung der Formulierungen und zur Übersetzung von Kommentaren und Text.
-- **Claude Code (Opus 4.8)** — eine abschliessende Review-Session (siehe unten).
+- **Claude Opus 4.8**
 
-### Wie ich gearbeitet habe (und wie nicht)
-- Die Designentscheidungen stammen von mir: unveränderliche Snapshots für Undo/Redo, die `sealed`-Hierarchie `Command` / `Edit` und die Isolierung aller IO in `Main.kt`.
-- Ich habe die KI genutzt, um Konzepte Schritt für Schritt umzusetzen, zu reviewen und zu übersetzen — nicht, um das ganze Programm auf einmal zu generieren.
-
-### Konzepte, die ich (mit Claude-Unterstützung) erarbeitet habe
-1. Themenwahl und Planung.
-2. Datenmodell: unveränderliche `Task` / `TodoList` und rekursive Funktionen.
-3. Commands: die `sealed` Befehlshierarchie und `applyEdit`.
-4. Undo/Redo: der Snapshot-Listen-Ansatz in `History.kt`.
-5. Parser und Render: Eingabe-Parsing und die Text-Baum-Ausgabe.
-6. Main: die isolierte IO-Schleife.
-7. Tests: Unit-Tests für die reinen Funktionen.
-
-### Prompts zur Vereinfachung & Übersetzung (Junie)
-1. „Please write the simplest possible code that is functional and easy to understand. Important: all criteria must be fully met."
-2. „Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability." (Hinweis: Kommentare wurden später wieder entfernt.)
-3. „Adjust the tests to the new function names and the German localization."
-4. „no comments in the code, the code must be written understandably without comments"
-5. „everything in English"
+### Prompts 
+1. „I want to make a to do list, how would you implement undo und redo in functional programming, which conecpts would be nice to implement?"
+2. „Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability."
+3. „Adjust the tests to the new function names"
+4. "Give me a review to the model logic before I will continue with the implementation of that model"
+5. "How would you parse the command line input of the user to actual commands for e.g. add functionality?"
 
 ### Abschliessende Review-Session (Claude Code, Opus 4.8)
 In einer letzten Session habe ich Claude Code genutzt, um das Projekt zu reviewen und fertigzustellen. In dieser Session hat Claude:
 - die Fold-basierte Fortschrittsanzeige (`countProgress` / `renderProgress`) samt Tests ergänzt,
-- eine ungenutzte, nicht mehr aufgerufene `replay`-Hilfsfunktion entfernt,
 - stdin angebunden, sodass die App auch über `gradle run` läuft (nicht nur aus der IDE),
-- und dieses README mit dem Code in Einklang gehalten.
