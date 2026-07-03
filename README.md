@@ -66,7 +66,7 @@ The entire code is divided into a pure core and a thin impure shell.
 |---|---|---|
 | `Model.kt` | Data model (`Task`, `TodoList`) and logic (add, complete, isComplete) | yes |
 | `Command.kt` | `sealed` command hierarchy and `applyEdit` | yes |
-| `History.kt` | undo/redo via snapshots, `replay` with fold | yes |
+| `History.kt` | undo/redo via immutable snapshot lists | yes |
 | `Parser.kt` | String to Command | yes |
 | `Render.kt` | TodoList to text tree | yes |
 | `Main.kt` | Console loop, only place with IO | no |
@@ -79,7 +79,7 @@ The entire code is divided into a pure core and a thin impure shell.
 | Immutable Data | `Task` and `TodoList` are `data class`, changes only via `.copy()`, never mutation |
 | Recursion | `isComplete`, `markAllDoneRecursive`, `updateTaskRecursive`, `renderTaskRecursive`, and the `loop` in Main (tailrec) |
 | Pattern Matching | exhaustive `when` over `sealed` types in `applyEdit` and `applyCommand` (no `else`) |
-| map / filter / fold | `tasks.map { ... }` in `Model.kt`, `edits.fold(...)` in `replay` |
+| map / filter | `list.tasks.map { ... }` and `subtasks.map(::markAllDone)` in `Model.kt`; `subtasks.all { isComplete(it) }` in `isComplete` |
 | Higher-Order Functions | `updateTaskRecursive(task, name, transform)` takes a function, used by `addSubtask` and `completeTask` |
 | Isolated Side-Effects | all `println` and `readlnOrNull` strictly in `Main.kt` |
 
@@ -98,7 +98,7 @@ All pure functions are covered by `kotlin.test`:
 
 - `ModelTest`: add, addSubtask, complete, automatic parent completion, and a test proving that the original object remains unchanged
 - `CommandTest`: `applyEdit` for Add, AddSub, Complete
-- `HistoryTest`: undo, redo, clearing the redo `future` after a new edit, undo on empty history, and `replay` with fold
+- `HistoryTest`: undo, redo, clearing the redo `future` after a new edit, and undo on empty history
 - `ParserTest`: all commands including names with spaces and invalid input
 - `RenderTest`: indentation and auto-checkmarks for parents
 
