@@ -1,3 +1,8 @@
+/**
+ * Dieses File verwaltet die Historie der Todo-Liste, um Undo- und Redo-Funktionen zu ermöglichen.
+ * Es definiert die Datenstruktur History und Funktionen zum Anwenden von Edits,
+ * sowie zum Rückgängigmachen (Undo) und Wiederholen (Redo) von Aktionen.
+ */
 package todo
 
 data class History(
@@ -34,6 +39,3 @@ fun applyCommand(history: History, command: Command): History = when (command) {
     is Undo -> undo(history)
     is Redo -> redo(history)
 }
-
-fun replay(initial: TodoList, edits: List<Edit>): TodoList =
-    edits.fold(initial) { state, edit -> applyEdit(state, edit) }
