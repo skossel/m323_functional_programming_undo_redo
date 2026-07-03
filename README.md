@@ -1,35 +1,35 @@
-# Undo/Redo Todo (Module m323, Functional Programming)
+# Undo/Redo Todo (Modul m323, Funktionale Programmierung)
 
-A small CLI Todo application in Kotlin. You can create tasks and subtasks, check them off, and undo or redo every action. The project is kept small so that the functional concepts are clearly visible and easy to explain.
+Eine kleine CLI-Todo-Anwendung in Kotlin. Man kann Aufgaben und Unteraufgaben erstellen, sie abhaken und jede Aktion rückgängig machen (Undo) oder wiederherstellen (Redo). Das Projekt ist bewusst klein gehalten, damit die funktionalen Konzepte klar sichtbar und einfach zu erklären sind.
 
-## Features
+## Funktionen
 
-- `add <task>` creates a top-level task
-- `add <subtask> to <parent>` nests a subtask under a parent
-- `complete <task>` completes a task including its entire subtree
-- `undo` undoes the last change
-- `redo` reapplies a previously undone change
-- `quit` terminates the program
-- After each action, the current state of the list is displayed
-- A parent is automatically marked as done once all its subtasks are completed (recursively over any depth)
-- A progress summary (`Progress: done/total completed`) is shown after each action
+- `add <task>` erstellt eine Aufgabe auf oberster Ebene
+- `add <subtask> to <parent>` verschachtelt eine Unteraufgabe unter einer übergeordneten Aufgabe
+- `complete <task>` schliesst eine Aufgabe inklusive ihres gesamten Teilbaums ab
+- `undo` macht die letzte Änderung rückgängig
+- `redo` wendet eine rückgängig gemachte Änderung erneut an
+- `quit` beendet das Programm
+- Nach jeder Aktion wird der aktuelle Zustand der Liste angezeigt
+- Eine übergeordnete Aufgabe wird automatisch als erledigt markiert, sobald alle ihre Unteraufgaben abgeschlossen sind (rekursiv über beliebige Tiefe)
+- Nach jeder Aktion wird eine Fortschrittsanzeige im Format `Progress: <erledigt>/<gesamt> completed` ausgegeben
 
-## Running
+## Ausführen
 
-Requirement: a JDK (tested with JDK 21, JDK 17+ is sufficient).
+Voraussetzung: ein JDK (ab JDK 17 lauffähig; getestet mit JDK 21 und JDK 25).
 
-Easiest in IntelliJ IDEA: Open the project, Gradle imports automatically. Then run `Main.kt`. Tests are located in the `src/test` directory.
+Am einfachsten in IntelliJ IDEA: Projekt öffnen, Gradle importiert automatisch. Dann `Main.kt` ausführen. Die Tests liegen im Verzeichnis `src/test`.
 
-Via command line with Gradle:
+Über die Kommandozeile mit Gradle:
 
 ```
-gradle run      # starts the app
-gradle test     # runs all unit tests
+gradle run      # startet die App
+gradle test     # führt alle Unit-Tests aus
 ```
 
-(If a Gradle wrapper is present, use `./gradlew run` or `./gradlew test` instead.)
+Ein Gradle-Wrapper ist vorhanden, du kannst daher auch `./gradlew run` bzw. `./gradlew test` verwenden (unter Windows `gradlew.bat run` bzw. `gradlew.bat test`).
 
-## Example Session
+## Beispielsitzung
 
 ```
 > add Trip
@@ -66,99 +66,89 @@ Progress: 1/3 completed
 Progress: 3/3 completed
 ```
 
-## Project Structure
+## Projektstruktur
 
-The entire code is divided into a pure core and a thin impure shell.
+Der gesamte Code ist in einen reinen Kern (pure core) und eine dünne, unreine Schale (impure shell) aufgeteilt.
 
-| File | Role | Pure? |
+| Datei | Rolle | Rein? |
 |---|---|---|
-| `Model.kt` | Data model (`Task`, `TodoList`) and logic (add, complete, isComplete, countProgress) | yes |
-| `Command.kt` | `sealed` command hierarchy and `applyEdit` | yes |
-| `History.kt` | undo/redo via immutable snapshot lists | yes |
-| `Parser.kt` | String to Command | yes |
-| `Render.kt` | TodoList to text tree and progress summary | yes |
-| `Main.kt` | Console loop, only place with IO | no |
+| `Model.kt` | Datenmodell (`Task`, `TodoList`) und Logik (add, complete, isComplete, countProgress) | ja |
+| `Command.kt` | `sealed` Befehlshierarchie und `applyEdit` | ja |
+| `History.kt` | Undo/Redo über unveränderliche Snapshot-Listen | ja |
+| `Parser.kt` | String zu Command | ja |
+| `Render.kt` | TodoList zu Text-Baum und Fortschrittsanzeige | ja |
+| `Main.kt` | Konsolenschleife, einziger Ort mit IO | nein |
 
-## Functional Concepts and their Implementation
+## Funktionale Konzepte und ihre Umsetzung
 
-| Concept | Location in Code |
+| Konzept | Stelle im Code |
 |---|---|
-| Pure Functions | all functions except in `Main.kt` (e.g., `addTask`, `completeTask`, `applyEdit`, `undo`, `render`) |
-| Immutable Data | `Task` and `TodoList` are `data class`, changes only via `.copy()`, never mutation |
-| Recursion | `isComplete`, `markAllDone`, `updateTask`, `countProgress`, `renderTaskRecursive`, and the `loop` in Main (tailrec) |
-| Pattern Matching | exhaustive `when` over `sealed` types in `applyEdit` and `applyCommand` (no `else`) |
+| Reine Funktionen | alle Funktionen ausser in `Main.kt` (z. B. `addTask`, `completeTask`, `applyEdit`, `undo`, `render`) |
+| Unveränderliche Daten | `Task` und `TodoList` sind `data class`, Änderungen nur über `.copy()`, nie durch Mutation |
+| Rekursion | `isComplete`, `markAllDone`, `updateTask`, `countProgress`, `renderTaskRecursive` und die `loop` in Main (tailrec) |
+| Pattern Matching | erschöpfendes `when` über `sealed`-Typen in `applyEdit` und `applyCommand` (kein `else`) |
 | map / filter / fold | `list.tasks.map { ... }` in `Model.kt`; `subtasks.all { isComplete(it) }` in `isComplete`; `tasks.fold(Progress(0, 0)) { ... }` in `countProgress` |
-| Higher-Order Functions | `updateTaskRecursive(task, name, transform)` takes a function, used by `addSubtask` and `completeTask` |
-| Isolated Side-Effects | all `println` and `readlnOrNull` strictly in `Main.kt` |
+| Higher-Order Functions | `updateTask(task, name, transform)` nimmt eine Funktion entgegen, genutzt von `addSubtask` und `completeTask` |
+| Isolierte Seiteneffekte | alle `println` und `readlnOrNull` ausschliesslich in `Main.kt` |
 
-### The Core Idea: Why Undo/Redo is almost free here
+### Die Grundidee: Warum Undo/Redo hier fast gratis ist
 
-The history consists of three immutable lists: `past`, `present`, `future`.
-Because every `TodoList` state is immutable, a snapshot is simply the value itself. Nothing needs to be copied or frozen. Undo just means: making the last state from `past` the new `present` and pushing the current `present` into the `future` for a later redo. In a mutable world, you would have to take a deep copy at each step; otherwise, all snapshots would point to the same modified object.
+Die Historie besteht aus drei unveränderlichen Listen: `past`, `present`, `future`.
+Weil jeder `TodoList`-Zustand unveränderlich ist, ist ein Snapshot einfach der Wert selbst. Nichts muss kopiert oder eingefroren werden. Undo bedeutet nur: den letzten Zustand aus `past` zum neuen `present` machen und den aktuellen `present` für ein späteres Redo in die `future` schieben. In einer veränderlichen Welt müsste man bei jedem Schritt eine tiefe Kopie anlegen; sonst würden alle Snapshots auf dasselbe, veränderte Objekt zeigen.
 
-### Separation of Business Logic and User Interface
+### Trennung von Geschäftslogik und Benutzeroberfläche
 
-`parse` returns `null` for invalid input and `render` only returns a string. Neither of them prints anything. The decision to output an error message or the list status is made solely by `Main.kt`. As a result, the entire core is deterministic and testable without mocking.
+`parse` gibt bei ungültiger Eingabe `null` zurück und `render` gibt nur einen String zurück. Keine der beiden gibt etwas aus. Die Entscheidung, ob eine Fehlermeldung oder der Listenstatus ausgegeben wird, trifft ausschliesslich `Main.kt`. Dadurch ist der gesamte Kern deterministisch und ohne Mocking testbar.
 
 ## Tests
 
-All pure functions are covered by `kotlin.test`:
+Alle reinen Funktionen sind mit `kotlin.test` abgedeckt:
 
-- `ModelTest`: add, addSubtask, complete, automatic parent completion, `countProgress` folding over the tree, and a test proving that the original object remains unchanged
-- `CommandTest`: `applyEdit` for Add, AddSub, Complete
-- `HistoryTest`: undo, redo, clearing the redo `future` after a new edit, and undo on empty history
-- `ParserTest`: all commands including names with spaces and invalid input
-- `RenderTest`: indentation, auto-checkmarks for parents, and the progress summary
+- `ModelTest`: add, addSubtask, complete, automatische Eltern-Fertigstellung, `countProgress` als Fold über den Baum, und ein Test, der beweist, dass das ursprüngliche Objekt unverändert bleibt
+- `CommandTest`: `applyEdit` für Add, AddSub, Complete
+- `HistoryTest`: undo, redo, Leeren der Redo-`future` nach einer neuen Änderung, und undo bei leerer Historie
+- `ParserTest`: alle Befehle inklusive Namen mit Leerzeichen und ungültiger Eingabe
+- `RenderTest`: Einrückung, automatische Häkchen für Elternaufgaben, und die Fortschrittsanzeige
 
-`Main.kt` is deliberately not unit-tested as it is only the isolated IO shell.
+`Main.kt` wird bewusst nicht per Unit-Test geprüft, da es nur die isolierte IO-Schale ist.
 
-## Known Simplifications
+## Bekannte Vereinfachungen
 
-- Task names are assumed to be (mostly) unique. `updateTaskRecursive` would change all matches if names are duplicated.
-- In `add <subtask> to <parent>`, the split happens at the last ` to `, so the parent name remains intact even if the subtask text contains the word "to".
+- Aufgabennamen werden als (weitgehend) eindeutig angenommen. `updateTask` würde bei doppelten Namen alle Treffer ändern.
+- Bei `add <subtask> to <parent>` wird am letzten ` to ` getrennt, sodass der Name der übergeordneten Aufgabe intakt bleibt, selbst wenn der Text der Unteraufgabe das Wort „to" enthält.
 
-## AI Usage (Mandatory Documentation)
+## KI-Nutzung (Pflichtdokumentation)
 
-I developed this project myself during class, working through the functional
-concepts one at a time. I used AI as an assistant — to help turn each concept
-into idiomatic Kotlin, to review my code, to catch mistakes, and for language
-and comment cleanup. The project was deliberately **not** produced in a single
-"one shot"; I built it concept by concept, and I can explain and defend every
-part of the code.
+Ich habe dieses Projekt selbst im Unterricht entwickelt und die funktionalen Konzepte eines nach dem anderen erarbeitet. Die KI habe ich als Assistenz eingesetzt — um jedes Konzept in idiomatisches Kotlin zu übersetzen, meinen Code zu reviewen, Fehler zu finden sowie für sprachliche und kommentarbezogene Bereinigung. Das Programm wurde bewusst **nicht** in einem einzigen „One-Shot" erzeugt; ich habe es Konzept für Konzept aufgebaut und kann jeden Teil des Codes erklären und verteidigen.
 
-### Tools used
-- **Claude (Anthropic)** — pair-programming support while I implemented the
-  individual concepts, plus code review and feedback.
-- **Junie (JetBrains AI)** — a later pass to simplify wording and translate
-  comments and text to English.
-- **Claude Code (Opus 4.8)** — a final review session (see below).
+### Eingesetzte Werkzeuge
+- **Claude (Anthropic)** — Pair-Programming-Unterstützung bei der Umsetzung der einzelnen Konzepte sowie Code-Review und Feedback.
+- **Junie (JetBrains AI)** — ein späterer Durchgang zur Vereinfachung der Formulierungen und zur Übersetzung von Kommentaren und Text.
+- **Claude Code (Opus 4.8)** — eine abschliessende Review-Session (siehe unten).
 
-### How I worked (and how I did not)
-- The design decisions are mine: immutable snapshots for undo/redo, the
-  `sealed` `Command` / `Edit` hierarchy, and keeping all IO isolated in `Main.kt`.
-- I used AI to implement concepts step by step, to review, and to translate —
-  not to generate the whole program at once.
+### Wie ich gearbeitet habe (und wie nicht)
+- Die Designentscheidungen stammen von mir: unveränderliche Snapshots für Undo/Redo, die `sealed`-Hierarchie `Command` / `Edit` und die Isolierung aller IO in `Main.kt`.
+- Ich habe die KI genutzt, um Konzepte Schritt für Schritt umzusetzen, zu reviewen und zu übersetzen — nicht, um das ganze Programm auf einmal zu generieren.
 
-### Concepts I worked through (with Claude assistance)
-1. Topic selection and planning.
-2. Data model: immutable `Task` / `TodoList` and recursive functions.
-3. Commands: the `sealed` command hierarchy and `applyEdit`.
-4. Undo/Redo: the snapshot-list approach in `History.kt`.
-5. Parser and Render: input parsing and the text-tree output.
-6. Main: the isolated IO loop.
-7. Tests: unit tests for the pure functions.
+### Konzepte, die ich (mit Claude-Unterstützung) erarbeitet habe
+1. Themenwahl und Planung.
+2. Datenmodell: unveränderliche `Task` / `TodoList` und rekursive Funktionen.
+3. Commands: die `sealed` Befehlshierarchie und `applyEdit`.
+4. Undo/Redo: der Snapshot-Listen-Ansatz in `History.kt`.
+5. Parser und Render: Eingabe-Parsing und die Text-Baum-Ausgabe.
+6. Main: die isolierte IO-Schleife.
+7. Tests: Unit-Tests für die reinen Funktionen.
 
-### Simplification & translation prompts (Junie)
-1. "Please write the simplest possible code that is functional and easy to understand. Important: all criteria must be fully met."
-2. "Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability." (Note: comments were later removed.)
-3. "Adjust the tests to the new function names and the German localization."
-4. "no comments in the code, the code must be written understandably without comments"
-5. "everything in English"
+### Prompts zur Vereinfachung & Übersetzung (Junie)
+1. „Please write the simplest possible code that is functional and easy to understand. Important: all criteria must be fully met."
+2. „Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability." (Hinweis: Kommentare wurden später wieder entfernt.)
+3. „Adjust the tests to the new function names and the German localization."
+4. „no comments in the code, the code must be written understandably without comments"
+5. „everything in English"
 
-### Final review session (Claude Code, Opus 4.8)
-In a last session I used Claude Code to review and finish the project. In that
-session Claude:
-- added the fold-based progress summary (`countProgress` / `renderProgress`) plus tests,
-- removed an unused `replay` helper that was no longer called,
-- connected stdin so the app also runs via `gradle run` (not only from the IDE),
-- and kept this README in sync with the code.
+### Abschliessende Review-Session (Claude Code, Opus 4.8)
+In einer letzten Session habe ich Claude Code genutzt, um das Projekt zu reviewen und fertigzustellen. In dieser Session hat Claude:
+- die Fold-basierte Fortschrittsanzeige (`countProgress` / `renderProgress`) samt Tests ergänzt,
+- eine ungenutzte, nicht mehr aufgerufene `replay`-Hilfsfunktion entfernt,
+- stdin angebunden, sodass die App auch über `gradle run` läuft (nicht nur aus der IDE),
+- und dieses README mit dem Code in Einklang gehalten.
