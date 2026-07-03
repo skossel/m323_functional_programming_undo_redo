@@ -119,24 +119,46 @@ All pure functions are covered by `kotlin.test`:
 
 ## AI Usage (Mandatory Documentation)
 
-Models used: 
-- Claude 3 Opus (initial creation)
-- Junie (JetBrains AI) (refactoring for simplification and translation)
+I developed this project myself during class, working through the functional
+concepts one at a time. I used AI as an assistant — to help turn each concept
+into idiomatic Kotlin, to review my code, to catch mistakes, and for language
+and comment cleanup. The project was deliberately **not** produced in a single
+"one shot"; I built it concept by concept, and I can explain and defend every
+part of the code.
 
-The program was **not** generated in a single "one shot". First, a basic structure was developed step-by-step with Claude. Since this was too complex for the user, a targeted refactoring was performed by **Junie**.
+### Tools used
+- **Claude (Anthropic)** — pair-programming support while I implemented the
+  individual concepts, plus code review and feedback.
+- **Junie (JetBrains AI)** — a later pass to simplify wording and translate
+  comments and text to English.
+- **Claude Code (Opus 4.8)** — a final review session (see below).
 
-### Refactoring Prompts (Junie)
+### How I worked (and how I did not)
+- The design decisions are mine: immutable snapshots for undo/redo, the
+  `sealed` `Command` / `Edit` hierarchy, and keeping all IO isolated in `Main.kt`.
+- I used AI to implement concepts step by step, to review, and to translate —
+  not to generate the whole program at once.
+
+### Concepts I worked through (with Claude assistance)
+1. Topic selection and planning.
+2. Data model: immutable `Task` / `TodoList` and recursive functions.
+3. Commands: the `sealed` command hierarchy and `applyEdit`.
+4. Undo/Redo: the snapshot-list approach in `History.kt`.
+5. Parser and Render: input parsing and the text-tree output.
+6. Main: the isolated IO loop.
+7. Tests: unit tests for the pure functions.
+
+### Simplification & translation prompts (Junie)
 1. "Please write the simplest possible code that is functional and easy to understand. Important: all criteria must be fully met."
-2. "Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability." (Note: later removed comments)
+2. "Simplify the model logic in Model.kt and add German comments to increase understandability. Maintain recursion and immutability." (Note: comments were later removed.)
 3. "Adjust the tests to the new function names and the German localization."
 4. "no comments in the code, the code must be written understandably without comments"
 5. "everything in English"
 
-### Original Prompts (Claude)
-1. Planning and topic selection: Recommendation for a suitable project.
-2. Data model: Creation of immutable classes and recursive functions.
-3. Commands: Modeling the command hierarchy.
-4. Undo/Redo: Implementation via snapshot lists.
-5. Parser and Render: Implementation of input and output logic.
-6. Main: Implementation of the IO shell.
-7. Tests: Creation of unit tests.
+### Final review session (Claude Code, Opus 4.8)
+In a last session I used Claude Code to review and finish the project. In that
+session Claude:
+- added the fold-based progress summary (`countProgress` / `renderProgress`) plus tests,
+- removed an unused `replay` helper that was no longer called,
+- connected stdin so the app also runs via `gradle run` (not only from the IDE),
+- and kept this README in sync with the code.
